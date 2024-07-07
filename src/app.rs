@@ -3,19 +3,22 @@
 
 use crossterm::event::KeyCode;
 
-use crate::position::Position;
+use crate::{position::Position, stockfish::Stockfish};
 
 #[derive(Debug)]
 /// Contains all state information of the app
 pub struct App {
     /// The chess position currently displayed
     pub position: Position,
+    /// The stockfish instance
+    pub stockfish: Stockfish,
 }
 
 impl Default for App {
     fn default() -> Self {
         Self {
-            position: Position::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+            position: Position::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
+            stockfish: Stockfish::new(),
         }
     }
 }

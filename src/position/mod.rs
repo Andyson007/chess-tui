@@ -59,8 +59,8 @@ impl Color {
 
 #[derive(Clone, Copy)]
 struct Piece {
-    pub piece: PieceType,
-    pub color: Color,
+    piece: PieceType,
+    color: Color,
 }
 
 impl Piece {

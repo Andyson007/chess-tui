@@ -32,6 +32,7 @@ impl Position {
             }
             para.push(Line::from(curr));
         }
+        para.push(Line::from(Span::raw(self.fen.clone())));
         frame.render_widget(Paragraph::new(para), chunk);
     }
 }
