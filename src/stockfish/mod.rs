@@ -1,12 +1,13 @@
 //! Responsible for handling the stockfish instance
 use std::{
-    io::{BufRead, BufReader, Write},
+    io::{BufRead, BufReader, Read, Write},
     process::{Command, Stdio},
     sync::Arc,
     thread::{self, JoinHandle},
 };
 
 mod eval;
+mod options;
 mod thread_stuff;
 
 use eval::Eval;
@@ -51,16 +52,26 @@ impl Stockfish {
                 let handle = instance.stdin.as_mut().unwrap();
                 let stdout = instance.stdout.as_mut().unwrap();
                 let mut buf = BufReader::new(stdout);
-                handle.write_all(b"uci\n").unwrap();
-                // TODO: Parse all the options before sending a ucinewgame
                 let mut reader_buf = String::new();
-                loop {
-                    // probably unneccessary
+                buf.read_line(&mut reader_buf).unwrap();
+                reader_buf.clear();
+                handle.write_all(b"uci\n").unwrap();
+                for _ in 0..3 {
+                    buf.read_line(&mut reader_buf).unwrap();
+                    eprintln!("a{reader_buf}a");
                     reader_buf.clear();
-                    while buf.read_line(&mut reader_buf).is_ok() {
-                        eprintln!("\t{reader_buf}");
-                        reader_buf.clear();
+                }
+                // TODO: Parse all the options before sending a ucinewgame
+                let mut options = Vec::new();
+                while buf.read_line(&mut reader_buf).is_ok() {
+                    if reader_buf == *"uciok\n" {
+                        break;
                     }
+                    options.push(options::Option::parse(&reader_buf));
+                    reader_buf.clear();
+                }
+                eprintln!("{options:?}");
+                loop {
                     match thread_receiver.try_next() {
                         Ok(Some(x)) => match x {
                             Action::SetFen(x) => handle
@@ -69,17 +80,15 @@ impl Stockfish {
                             Action::Start => handle.write_all(b"go\n").unwrap(),
                             Action::Stop => {
                                 handle.write_all(b"stop\n").unwrap();
-                                reader_buf.clear();
                                 buf.read_line(&mut reader_buf).unwrap();
                             }
                             Action::Eval => {
                                 handle.write_all(b"eval\n").unwrap();
-                                reader_buf.clear();
-                                // HACK: This shouldn't just read 70 lines but idk how to improve
-                                for _ in 0..70 {
+                                // HACK: This shouldn't just read 72 lines but idk how to improve
+                                for _ in 0..72 {
                                     let _ = buf.read_line(&mut reader_buf);
+                                    eprintln!("{reader_buf}");
                                 }
-                                eprintln!("{reader_buf}");
                                 thread_eval.data.store(Eval::parse(&reader_buf));
                                 thread_eval.stop_waiting();
                             }
@@ -146,7 +155,6 @@ mod test {
         stockfish.stop();
         let eval = stockfish.get_eval();
         eprintln!("{eval:?}");
-        panic!()
     }
 }
 
