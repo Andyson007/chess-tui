@@ -82,7 +82,7 @@ impl Data {
 
 #[cfg(test)]
 mod test {
-    use crate::stockfish::options::{Data, Option};
+    use crate::engine::options::{Data, Option};
 
     #[test]
     fn parse_options() {

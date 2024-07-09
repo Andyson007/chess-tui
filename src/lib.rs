@@ -11,4 +11,4 @@ pub mod app;
 pub mod ui;
 pub mod errors;
 pub mod position;
-pub mod stockfish;
+pub mod engine;

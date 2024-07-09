@@ -1,8 +1,8 @@
 //! Responsible for handling the stockfish instance
 use std::{
-    io::{BufRead, BufReader, Read, Write},
+    io::{BufRead, BufReader, Write},
     process::{Command, Stdio},
-    sync::Arc,
+    sync::{Arc, Mutex},
     thread::{self, JoinHandle},
 };
 
@@ -22,14 +22,15 @@ use futures::{
 
 #[derive(Debug)]
 /// The main stockfish instance
-pub struct Stockfish {
+pub struct Engine {
     handle: JoinHandle<()>,
     sender: Sender<Action>,
     receiver: UnboundedReceiver<String>,
     eval: Arc<Wait<AtomicCell<Eval>>>,
+    options: Arc<Mutex<Option<Vec<self::options::Option>>>>,
 }
 
-impl Stockfish {
+impl Engine {
     /// Spawn a new thread to handle a stockfish instance. This thread can be sent commands
     /// to with to `Action` enum.
     /// You can get data from it by reading from the receiver
@@ -38,9 +39,11 @@ impl Stockfish {
     #[must_use]
     pub fn new() -> Self {
         let (sync_sender, mut thread_receiver) = mpsc::channel::<Action>(8);
-        let (mut thread_sender, sync_receiver) = mpsc::unbounded::<String>();
+        let (_thread_sender, sync_receiver) = mpsc::unbounded::<String>();
         let eval = Arc::new(Wait::new(AtomicCell::default()));
         let thread_eval = Arc::clone(&eval);
+        let options = Arc::new(Mutex::new(None));
+        let thread_options = Arc::clone(&options);
         let handle = thread::spawn(move || {
             futures::executor::block_on(async {
                 let mut instance = Command::new("stockfish")
@@ -58,7 +61,6 @@ impl Stockfish {
                 handle.write_all(b"uci\n").unwrap();
                 for _ in 0..3 {
                     buf.read_line(&mut reader_buf).unwrap();
-                    eprintln!("a{reader_buf}a");
                     reader_buf.clear();
                 }
                 // TODO: Parse all the options before sending a ucinewgame
@@ -70,7 +72,8 @@ impl Stockfish {
                     options.push(options::Option::parse(&reader_buf));
                     reader_buf.clear();
                 }
-                eprintln!("{options:?}");
+                *thread_options.lock().unwrap() = Some(options);
+
                 loop {
                     match thread_receiver.try_next() {
                         Ok(Some(x)) => match x {
@@ -107,6 +110,7 @@ impl Stockfish {
             receiver: sync_receiver,
             sender: sync_sender,
             eval,
+            options,
         }
     }
 
@@ -137,7 +141,7 @@ impl Stockfish {
     }
 }
 
-impl Default for Stockfish {
+impl Default for Engine {
     fn default() -> Self {
         Self::new()
     }
@@ -145,11 +149,11 @@ impl Default for Stockfish {
 
 #[cfg(test)]
 mod test {
-    use crate::stockfish::Stockfish;
+    use crate::engine::Engine;
 
     #[test]
     fn stockfish() {
-        let mut stockfish = Stockfish::new();
+        let mut stockfish = Engine::new();
         stockfish.set_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string());
         stockfish.start();
         stockfish.stop();
