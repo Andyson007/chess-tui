@@ -49,7 +49,13 @@ impl Data {
             "check" => Self::parse_check(raw),
             "spin" => Self::parse_spin(raw),
             "button" => Self::Button,
-            "string" => Self::Button,
+            "string" => Self::String {
+                value: "THIS IS TEMPORARY".to_string(),
+            },
+            "combo" => Self::Combo {
+                value: "DEFAULT".to_string(),
+                options: vec![],
+            },
             x => unimplemented!("{x}"),
         }
     }

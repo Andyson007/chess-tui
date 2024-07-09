@@ -1,5 +1,6 @@
 #[derive(Debug, Copy, Clone)]
 pub struct Eval {
+    #[allow(unused)]
     length: Option<usize>,
 }
 

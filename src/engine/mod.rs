@@ -15,7 +15,10 @@ use thread_stuff::Wait;
 
 use crossbeam::atomic::AtomicCell;
 use futures::{
-    channel::mpsc::{self, Sender, UnboundedReceiver},
+    channel::{
+        mpsc::{self, Sender, UnboundedReceiver},
+        oneshot,
+    },
     executor::block_on,
     SinkExt,
 };
@@ -23,11 +26,14 @@ use futures::{
 #[derive(Debug)]
 /// The main stockfish instance
 pub struct Engine {
+    #[allow(unused)]
     handle: JoinHandle<()>,
     sender: Sender<Action>,
+    #[allow(unused)]
     receiver: UnboundedReceiver<String>,
     eval: Arc<Wait<AtomicCell<Eval>>>,
-    options: Arc<Mutex<Option<Vec<self::options::Option>>>>,
+    #[allow(unused)]
+    options: Arc<Mutex<Vec<self::options::Option>>>,
 }
 
 impl Engine {
@@ -42,8 +48,7 @@ impl Engine {
         let (_thread_sender, sync_receiver) = mpsc::unbounded::<String>();
         let eval = Arc::new(Wait::new(AtomicCell::default()));
         let thread_eval = Arc::clone(&eval);
-        let options = Arc::new(Mutex::new(None));
-        let thread_options = Arc::clone(&options);
+        let (options_sender, options_receiver) = oneshot::channel();
         let handle = thread::spawn(move || {
             futures::executor::block_on(async {
                 let mut instance = Command::new("stockfish")
@@ -63,7 +68,6 @@ impl Engine {
                     buf.read_line(&mut reader_buf).unwrap();
                     reader_buf.clear();
                 }
-                // TODO: Parse all the options before sending a ucinewgame
                 let mut options = Vec::new();
                 while buf.read_line(&mut reader_buf).is_ok() {
                     if reader_buf == *"uciok\n" {
@@ -72,7 +76,8 @@ impl Engine {
                     options.push(options::Option::parse(&reader_buf));
                     reader_buf.clear();
                 }
-                *thread_options.lock().unwrap() = Some(options);
+                options_sender.send(options).unwrap();
+                handle.write_all(b"ucinewgame").unwrap();
 
                 loop {
                     match thread_receiver.try_next() {
@@ -105,12 +110,14 @@ impl Engine {
             });
         });
 
+        let options = block_on(options_receiver).unwrap();
+
         Self {
             handle,
             receiver: sync_receiver,
             sender: sync_sender,
             eval,
-            options,
+            options: Arc::new(Mutex::new(options)),
         }
     }
 
