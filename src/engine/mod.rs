@@ -96,7 +96,7 @@ impl Engine {
                                 for _ in 0..72 {
                                     let _ = buf.read_line(&mut reader_buf);
                                 }
-                                eprintln!("{reader_buf}");
+                                // eprintln!("{reader_buf}");
                                 thread_eval.data.store(Eval::parse(&reader_buf));
                                 thread_eval.stop_waiting();
                             }
@@ -112,7 +112,7 @@ impl Engine {
 
         let options = block_on(options_receiver).unwrap();
 
-        eprintln!("{options:?}");
+        // eprintln!("{options:?}");
 
         Self {
             handle,
@@ -167,7 +167,7 @@ mod test {
         stockfish.start();
         stockfish.stop();
         let eval = stockfish.get_eval();
-        eprintln!("{eval:?}");
+        // eprintln!("{eval:?}");
     }
 }
 

@@ -14,7 +14,7 @@ impl Default for Eval {
 
 impl Eval {
     pub fn parse(data: &str) -> Self {
-        eprintln!("{}", data.lines().nth(1).unwrap());
+        // eprintln!("{}", data.lines().nth(1).unwrap());
         Self {
             length: Some(data.lines().count()),
         }
