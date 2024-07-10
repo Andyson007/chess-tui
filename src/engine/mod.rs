@@ -77,7 +77,7 @@ impl Engine {
                     reader_buf.clear();
                 }
                 options_sender.send(options).unwrap();
-                handle.write_all(b"ucinewgame").unwrap();
+                handle.write_all(b"ucinewgame\n").unwrap();
 
                 loop {
                     match thread_receiver.try_next() {
@@ -95,8 +95,8 @@ impl Engine {
                                 // HACK: This shouldn't just read 72 lines but idk how to improve
                                 for _ in 0..72 {
                                     let _ = buf.read_line(&mut reader_buf);
-                                    eprintln!("{reader_buf}");
                                 }
+                                eprintln!("{reader_buf}");
                                 thread_eval.data.store(Eval::parse(&reader_buf));
                                 thread_eval.stop_waiting();
                             }
@@ -111,6 +111,8 @@ impl Engine {
         });
 
         let options = block_on(options_receiver).unwrap();
+
+        eprintln!("{options:?}");
 
         Self {
             handle,
