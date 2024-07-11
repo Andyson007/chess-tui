@@ -1,16 +1,21 @@
 //! This module does everything that has to do with storing chess-positions
 
 mod draw;
+mod input;
 #[derive(Debug)]
 /// Stores a chess position
 pub struct Position {
     fen: String,
+    highlighted: Option<(u16, u16)>,
 }
 
 impl Position {
     /// Parses a fen and create a `Position` from it
     pub fn from(fen: impl Into<String>) -> Self {
-        Self { fen: fen.into() }
+        Self {
+            fen: fen.into(),
+            highlighted: None,
+        }
     }
 
     fn at(&self, row: usize, col: usize) -> Option<Piece> {

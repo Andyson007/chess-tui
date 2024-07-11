@@ -22,11 +22,25 @@ impl Position {
                 curr.push(Span::styled(
                     to_push,
                     Style::new()
-                        .bg(if (i + j) & 1 == 0 {
-                            Color::Blue
-                        } else {
-                            Color::Green
-                        })
+                        .bg(
+                            if (i + j) & 1 == 0 {
+                                if self.highlighted.is_some_and(|(a, b)| {
+                                    usize::from(a) == i && usize::from(b) == j
+                                }) {
+                                    Color::LightBlue
+                                } else {
+                                    Color::Blue
+                                }
+                            } else {
+                                if self.highlighted.is_some_and(|(a, b)| {
+                                    usize::from(a) == i && usize::from(b) == j
+                                }) {
+                                    Color::LightGreen
+                                } else {
+                                    Color::Green
+                                }
+                            },
+                        )
                         .fg(piece.map_or(Color::Green, |x| x.color.color())),
                 ));
             }

@@ -50,14 +50,22 @@ where
     loop {
         terminal.draw(|f| ui(f, app))?;
 
-        if let Event::Key(key) = event::read()? {
-            if key.kind == event::KeyEventKind::Release {
-                // Skip events that are not KeyEventKind::Press
-                continue;
+        match event::read()? {
+            Event::Key(key) => {
+                if key.kind == event::KeyEventKind::Release {
+                    // Skip events that are not KeyEventKind::Press
+                    continue;
+                }
+                if app.handle_input(key.code) {
+                    return Ok(());
+                };
             }
-            if app.handle_input(key.code) {
-                return Ok(());
-            };
+            Event::Mouse(mouse) => {
+                if app.handle_mouse(mouse, &terminal.get_frame().size()) {
+                    return Ok(());
+                }
+            }
+            _ => (),
         }
     }
 }

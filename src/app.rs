@@ -1,9 +1,10 @@
 //! The main module.
 //! implements App and all of its features
 
-use crossterm::event::KeyCode;
+use crossterm::event::{KeyCode, MouseButton, MouseEvent};
+use ratatui::layout::Rect;
 
-use crate::{position::Position, engine::Engine};
+use crate::{engine::Engine, position::Position};
 
 #[derive(Debug)]
 /// Contains all state information of the app
@@ -29,5 +30,17 @@ impl App {
     /// returns true if the app should exit
     pub fn handle_input(&mut self, code: KeyCode) -> bool {
         matches!(code, KeyCode::Esc | KeyCode::Char('q'))
+    }
+
+    /// Handles mouseevents
+    pub fn handle_mouse(&mut self, event: MouseEvent, frame: &Rect) -> bool {
+        #[allow(clippy::single_match)]
+        match event.kind {
+            crossterm::event::MouseEventKind::Down(MouseButton::Left) => {
+                self.position.handle_mouse(frame, event);
+            },
+            _ => (),
+        }
+        false
     }
 }
