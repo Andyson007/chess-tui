@@ -17,7 +17,7 @@ impl Position {
             let mut curr = Vec::new();
             for j in 0..8 {
                 let piece = self.at(i, j);
-                let mut to_push = piece.map_or(' ', Piece::to_char).to_string();
+                let mut to_push = piece.map_or(' ', Piece::to_unicode).to_string();
                 to_push.push(' ');
                 curr.push(Span::styled(
                     to_push,

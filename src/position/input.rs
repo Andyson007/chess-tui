@@ -6,6 +6,7 @@ use super::Position;
 impl Position {
     /// Handles clicking on the chessboard
     pub fn handle_mouse(&mut self, rect: &Rect, mouse: MouseEvent) {
+        self.highlighted = None;
         let row = i32::from(mouse.row) - i32::from(rect.x);
         let column = i32::from(mouse.column) - i32::from(rect.y);
         if row < 0 || column < 0 {

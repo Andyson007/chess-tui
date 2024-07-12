@@ -2,11 +2,21 @@
 
 mod draw;
 mod input;
+mod moves;
 #[derive(Debug)]
 /// Stores a chess position
 pub struct Position {
     fen: String,
     highlighted: Option<(u16, u16)>,
+}
+
+impl Default for Position {
+    fn default() -> Self {
+        Self {
+            fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string(),
+            highlighted: None,
+        }
+    }
 }
 
 impl Position {
@@ -37,7 +47,7 @@ impl Position {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 enum PieceType {
     King,
     Queen,
@@ -47,7 +57,7 @@ enum PieceType {
     Pawn,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 enum Color {
     White,
     Black,
@@ -62,15 +72,15 @@ impl Color {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 struct Piece {
-    piece: PieceType,
+    piece_type: PieceType,
     color: Color,
 }
 
 impl Piece {
-    pub const fn to_char(self) -> char {
-        match self.piece {
+    pub const fn to_unicode(self) -> char {
+        match self.piece_type {
             PieceType::King => '♚',
             PieceType::Queen => '♛',
             PieceType::Rook => '♜',
@@ -78,20 +88,6 @@ impl Piece {
             PieceType::Knight => '♞',
             PieceType::Pawn => '♟',
         }
-        // match (self.piece, self.color) {
-        //     (PieceType::King, Color::White) => '♔',
-        //     (PieceType::King, Color::Black) => '♚',
-        //     (PieceType::Queen, Color::White) => '♕',
-        //     (PieceType::Queen, Color::Black) => '♛',
-        //     (PieceType::Rook, Color::White) => '♖',
-        //     (PieceType::Rook, Color::Black) => '♜',
-        //     (PieceType::Bishop, Color::White) => '♗',
-        //     (PieceType::Bishop, Color::Black) => '♝',
-        //     (PieceType::Knight, Color::White) => '♘',
-        //     (PieceType::Knight, Color::Black) => '♞',
-        //     (PieceType::Pawn, Color::White) => '♙',
-        //     (PieceType::Pawn, Color::Black) => '♟',
-        // }
     }
 
     pub fn from(a: char) -> Option<Self> {
@@ -104,13 +100,24 @@ impl Piece {
                 } else {
                     Color::Black
                 },
-                piece: PieceType::from(a)?,
+                piece_type: PieceType::from(a)?,
             })
         }
     }
 }
 
 impl PieceType {
+    pub const fn to_char(self) -> Option<char> {
+        Some(match self {
+            Self::King => 'K',
+            Self::Queen => 'Q',
+            Self::Rook => 'R',
+            Self::Bishop => 'B',
+            Self::Knight => 'N',
+            Self::Pawn => return None,
+        })
+    }
+
     pub const fn from(c: char) -> Option<Self> {
         Some(match c.to_ascii_uppercase() {
             'K' => Self::King,
