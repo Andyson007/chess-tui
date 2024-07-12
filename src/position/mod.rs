@@ -1,21 +1,22 @@
 //! This module does everything that has to do with storing chess-positions
 
+use self::moves::Move;
+
 mod draw;
 mod input;
 mod moves;
 #[derive(Debug)]
 /// Stores a chess position
 pub struct Position {
-    fen: String,
+    /// This is the position the analysis started in
+    starting_position: String,
+    moves: Vec<Move>,
     highlighted: Option<(u16, u16)>,
 }
 
 impl Default for Position {
     fn default() -> Self {
-        Self {
-            fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string(),
-            highlighted: None,
-        }
+        Self::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
     }
 }
 
@@ -23,13 +24,14 @@ impl Position {
     /// Parses a fen and create a `Position` from it
     pub fn from(fen: impl Into<String>) -> Self {
         Self {
-            fen: fen.into(),
+            starting_position: fen.into(),
+            moves: Vec::new(),
             highlighted: None,
         }
     }
 
     fn at(&self, row: usize, col: usize) -> Option<Piece> {
-        let split = self.fen.split('/').nth(row)?;
+        let split = self.starting_position.split('/').nth(row)?;
         let Ok(mut col): Result<isize, <usize as TryInto<isize>>::Error> = col.try_into() else {
             return None;
         };

@@ -26,7 +26,7 @@ impl Move {
                 .to_char()
                 .into_iter()
                 .chain(dbg!(self.end.at(pos)).map(|_| 'x'))
-                .chain(self.end.to_notation())
+                .chain(self.end.to_chess_square())
                 .collect::<String>(),
         )
     }
@@ -45,7 +45,10 @@ impl Square {
         pos.at(7 - self.row as usize, self.col as usize)
     }
 
-    pub const fn to_notation(&self) -> [char; 2] {
+    /// Converts itself to coordinates e.g.
+    /// (0, 0) => a1
+    /// (5, 7) => f8
+    pub const fn to_chess_square(&self) -> [char; 2] {
         [(self.row + b'a') as char, ((self.col + 1) ^ 0x30) as char]
     }
 }

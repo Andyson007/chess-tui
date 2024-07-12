@@ -23,6 +23,7 @@ impl Position {
                     to_push,
                     Style::new()
                         .bg(
+                            #[allow(clippy::collapsible_else_if)]
                             if (i + j) & 1 == 0 {
                                 if self.highlighted.is_some_and(|(a, b)| {
                                     usize::from(a) == i && usize::from(b) == j
@@ -46,7 +47,7 @@ impl Position {
             }
             para.push(Line::from(curr));
         }
-        para.push(Line::from(Span::raw(self.fen.clone())));
+        para.push(Line::from(Span::raw(self.starting_position.clone())));
         frame.render_widget(Paragraph::new(para), chunk);
     }
 }
