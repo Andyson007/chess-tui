@@ -1,7 +1,10 @@
-use crossterm::event::MouseEvent;
+use crossterm::event::{KeyCode, MouseEvent};
 use ratatui::layout::Rect;
 
-use super::Position;
+use super::{
+    moves::{Move, Square},
+    Position,
+};
 
 impl Position {
     /// Handles clicking on the chessboard
@@ -24,5 +27,14 @@ impl Position {
         let x = row;
         let y = column / 2;
         self.highlighted = Some((x, y));
+    }
+
+    /// Handles keyboard events
+    pub fn handle_keyboard(&mut self, code: KeyCode) {
+        if !matches!(code, KeyCode::Char(' ')) {
+            return;
+        }
+        self.moves
+            .push(Move::new(Square::new(0, 1), Square::new(2, 2)));
     }
 }

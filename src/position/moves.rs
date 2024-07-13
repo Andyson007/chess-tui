@@ -10,7 +10,7 @@ impl Position {
     }
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, Clone, Copy)]
 pub struct Move {
     start: Square,
     end: Square,
@@ -18,21 +18,25 @@ pub struct Move {
 
 impl Move {
     // FIX: This doesn't account for disambiguation yet
-    pub fn get_notation(&self, pos: &Position) -> Option<String> {
+    pub fn get_notation(self, pos: &Position) -> Option<String> {
         let piece = pos.at(self.start.row as usize, self.start.col as usize)?;
         Some(
             piece
                 .piece_type
                 .to_char()
                 .into_iter()
-                .chain(dbg!(self.end.at(pos)).map(|_| 'x'))
+                .chain(self.end.at(pos).map(|_| 'x'))
                 .chain(self.end.to_chess_square())
                 .collect::<String>(),
         )
     }
+
+    pub const fn new(start: Square, end: Square) -> Self {
+        Self { start, end }
+    }
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, Clone, Copy)]
 pub struct Square {
     /// Zero indexed
     row: u8,
@@ -41,15 +45,21 @@ pub struct Square {
 }
 
 impl Square {
-    pub fn at(&self, pos: &Position) -> Option<Piece> {
+    pub fn at(self, pos: &Position) -> Option<Piece> {
         pos.at(7 - self.row as usize, self.col as usize)
     }
 
     /// Converts itself to coordinates e.g.
     /// (0, 0) => a1
     /// (5, 7) => f8
-    pub const fn to_chess_square(&self) -> [char; 2] {
+    pub const fn to_chess_square(self) -> [char; 2] {
         [(self.row + b'a') as char, ((self.col + 1) ^ 0x30) as char]
+    }
+
+    pub fn new(row: u8, col: u8) -> Self {
+        assert!(row < 8);
+        assert!(col < 8);
+        Self { row, col }
     }
 }
 

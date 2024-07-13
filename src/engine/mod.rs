@@ -145,7 +145,7 @@ impl Engine {
         let eval = &*self.eval;
         eval.set_waiting();
         let _ = block_on(self.sender.send(Action::Eval));
-        eprintln!("before waiting");
+        // eprintln!("before waiting");
         eval.wait().load()
     }
 }

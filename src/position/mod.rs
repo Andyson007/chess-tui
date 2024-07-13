@@ -74,25 +74,16 @@ impl Color {
     }
 }
 
+/// Defines a chesspiece with its type and color
 #[derive(Debug, Clone, Copy)]
-struct Piece {
+pub struct Piece {
     piece_type: PieceType,
     color: Color,
 }
 
 impl Piece {
-    pub const fn to_unicode(self) -> char {
-        match self.piece_type {
-            PieceType::King => '♚',
-            PieceType::Queen => '♛',
-            PieceType::Rook => '♜',
-            PieceType::Bishop => '♝',
-            PieceType::Knight => '♞',
-            PieceType::Pawn => '♟',
-        }
-    }
-
-    pub fn from(a: char) -> Option<Self> {
+    /// Takes a piece from a fen and converts it into a piece
+    fn from(a: char) -> Option<Self> {
         if a.is_numeric() {
             None
         } else {
@@ -118,6 +109,17 @@ impl PieceType {
             Self::Knight => 'N',
             Self::Pawn => return None,
         })
+    }
+    /// Generates the unicode character resembeling the current piece
+    pub const fn to_unicode(self) -> char {
+        match self {
+            Self::King => '♚',
+            Self::Queen => '♛',
+            Self::Rook => '♜',
+            Self::Bishop => '♝',
+            Self::Knight => '♞',
+            Self::Pawn => '♟',
+        }
     }
 
     pub const fn from(c: char) -> Option<Self> {

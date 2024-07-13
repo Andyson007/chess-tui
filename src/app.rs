@@ -29,7 +29,9 @@ impl App {
     /// # Return values
     /// returns true if the app should exit
     pub fn handle_input(&mut self, code: KeyCode) -> bool {
+        self.position.handle_keyboard(code);
         matches!(code, KeyCode::Esc | KeyCode::Char('q'))
+
     }
 
     /// Handles mouseevents
