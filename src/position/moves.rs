@@ -2,11 +2,25 @@ use std::collections::HashSet;
 
 use super::{Piece, Position};
 
+impl Piece {
+    /// Gets all available moves for the current piece
+    pub fn get_moves(&self, position: &Position) -> HashSet<Move> {
+        todo!()
+    }
+}
+
 impl Position {
     /// Gets all available moves for a given chessboard
     #[must_use]
     pub fn get_moves(&self) -> HashSet<Move> {
-        HashSet::new()
+        // self.pos
+        todo!()
+    }
+
+    /// Makes a move in place
+    pub fn make_move(&mut self, r#move: Move) {
+        // self.
+        todo!()
     }
 }
 
@@ -39,9 +53,9 @@ impl Move {
 #[derive(Debug, Hash, Clone, Copy)]
 pub struct Square {
     /// Zero indexed
-    row: u8,
+    pub row: u8,
     /// Zero indexed
-    col: u8,
+    pub col: u8,
 }
 
 impl Square {
@@ -54,6 +68,10 @@ impl Square {
     /// (5, 7) => f8
     pub const fn to_chess_square(self) -> [char; 2] {
         [(self.row + b'a') as char, ((self.col + 1) ^ 0x30) as char]
+    }
+
+    pub fn from_chess_square(data: &[char; 2]) -> Self {
+        Self::new(data[0] as u8 - b'a', (data[1] as u8 ^ 0x30) - 1)
     }
 
     pub fn new(row: u8, col: u8) -> Self {

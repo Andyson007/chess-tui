@@ -26,7 +26,7 @@ impl Position {
         // NOTE: This assumes that the chessboard is located top left
         let x = row;
         let y = column / 2;
-        self.highlighted = Some((x, y));
+        self.highlighted = Some(Square::new(x as u8, y as u8));
     }
 
     /// Handles keyboard events

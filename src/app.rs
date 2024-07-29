@@ -18,7 +18,10 @@ pub struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
-            position: Position::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
+            position: Position::try_from(
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            )
+            .unwrap(),
             stockfish: Engine::new(),
         }
     }
@@ -31,7 +34,6 @@ impl App {
     pub fn handle_input(&mut self, code: KeyCode) -> bool {
         self.position.handle_keyboard(code);
         matches!(code, KeyCode::Esc | KeyCode::Char('q'))
-
     }
 
     /// Handles mouseevents
@@ -40,7 +42,7 @@ impl App {
         match event.kind {
             crossterm::event::MouseEventKind::Down(MouseButton::Left) => {
                 self.position.handle_mouse(frame, event);
-            },
+            }
             _ => (),
         }
         false

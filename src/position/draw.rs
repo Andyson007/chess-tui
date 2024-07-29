@@ -8,25 +8,32 @@ use ratatui::{
     Frame,
 };
 
-use super::Position;
+use super::{Position, ScreenLayout};
 impl Position {
     /// Draws a chess-board inside of a rect
-    pub fn draw(&self, frame: &mut Frame, chunk: Rect) {
-        // The longest possible move I would have to format is 999. Nb8xc6+ Ne5xc6+
-        // NOTE: Doesn't allow for more than 1000 moves natively
-        let vertical = Layout::vertical([Constraint::Min(8), Constraint::Min(1)]).split(chunk);
-        let chunks = Layout::horizontal([
-            Constraint::Length(16),
-            Constraint::Max(2),
-            Constraint::Min(20),
-        ])
-        .split(vertical[0]);
-        self.render_board(frame, chunks[0]);
-        self.render_moves(frame, chunks[2]);
-        frame.render_widget(Line::from(Span::raw(&self.starting_position)), vertical[1]);
+    pub fn draw(&self, frame: &mut Frame, chunk: Rect, layout: ScreenLayout) {
+        match layout {
+            ScreenLayout::Small => {
+                // The longest possible move I would have to format is 999. Nb8xc6+ Ne5xc6+
+                // NOTE: Doesn't allow for more than 1000 moves natively
+                let vertical =
+                    Layout::vertical([Constraint::Min(8), Constraint::Min(1)]).split(chunk);
+                let chunks = Layout::horizontal([
+                    Constraint::Length(16),
+                    Constraint::Max(2),
+                    Constraint::Min(20),
+                ])
+                .split(vertical[0]);
+                self.render_small_board(frame, chunks[0]);
+                self.render_moves(frame, chunks[2]);
+                frame.render_widget(Line::from(Span::raw(&self.starting_position)), vertical[1]);
+            }
+            // TODO: This should render the board using ascii art instead of unicode chars
+            ScreenLayout::Large => todo!(),
+        }
     }
 
-    fn render_board(&self, frame: &mut Frame, chunk: Rect) {
+    fn render_small_board(&self, frame: &mut Frame, chunk: Rect) {
         let mut para = Vec::new();
         for i in 0..8 {
             let mut curr = Vec::new();
@@ -40,16 +47,16 @@ impl Position {
                         .bg(
                             #[allow(clippy::collapsible_else_if)]
                             if (i + j) & 1 == 0 {
-                                if self.highlighted.is_some_and(|(a, b)| {
-                                    usize::from(a) == i && usize::from(b) == j
+                                if self.highlighted.is_some_and(|x| {
+                                    usize::from(x.row) == i && usize::from(x.col) == j
                                 }) {
                                     Color::LightBlue
                                 } else {
                                     Color::Blue
                                 }
                             } else {
-                                if self.highlighted.is_some_and(|(a, b)| {
-                                    usize::from(a) == i && usize::from(b) == j
+                                if self.highlighted.is_some_and(|x| {
+                                    usize::from(x.row) == i && usize::from(x.col) == j
                                 }) {
                                     Color::LightGreen
                                 } else {
