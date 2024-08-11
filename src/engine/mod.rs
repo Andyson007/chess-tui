@@ -89,12 +89,19 @@ impl Engine {
                             Action::Stop => {
                                 handle.write_all(b"stop\n").unwrap();
                                 buf.read_line(&mut reader_buf).unwrap();
+                                while {
+                                    reader_buf.clear();
+                                    let _ = buf.read_line(&mut reader_buf);
+                                    reader_buf[0..8] != *"bestmove"
+                                } {}
+                                reader_buf.clear();
                             }
                             Action::Eval => {
                                 handle.write_all(b"eval\n").unwrap();
                                 // HACK: This shouldn't just read 72 lines but idk how to improve
-                                for _ in 0..72 {
+                                for i in 0..71 {
                                     let _ = buf.read_line(&mut reader_buf);
+                                    println!("{i}: \n{reader_buf}");
                                 }
                                 // eprintln!("{reader_buf}");
                                 thread_eval.data.store(Eval::parse(&reader_buf));
@@ -145,7 +152,7 @@ impl Engine {
         let eval = &*self.eval;
         eval.set_waiting();
         let _ = block_on(self.sender.send(Action::Eval));
-        // eprintln!("before waiting");
+        eprintln!("before waiting");
         eval.wait().load()
     }
 }
@@ -167,7 +174,8 @@ mod test {
         stockfish.start();
         stockfish.stop();
         let eval = stockfish.get_eval();
-        // eprintln!("{eval:?}");
+        eprintln!("{eval:?}");
+        panic!();
     }
 }
 

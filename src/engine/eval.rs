@@ -15,13 +15,15 @@ impl Default for Eval {
 
 impl Eval {
     pub fn parse(data: &str) -> Self {
-        // eprintln!("{}", data.lines().nth(1).unwrap());
+        eprintln!("{data}");
         Self {
             length: data.lines().count(),
             evals: data
                 .lines()
                 .rev()
-                .take(3)
+                .take(4)
+                .skip(1)
+                .inspect(|x| eprintln!("{x}"))
                 .map(|x| x.split_whitespace().nth(2))
                 .map(|x| x.unwrap().parse::<f64>().unwrap())
                 .collect::<Vec<_>>()
